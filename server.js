@@ -27,7 +27,6 @@ function locationHandler(request, response){
   response.send(location);
 }
 
-
 // Make sure the server is listening for requests
 app.listen(PORT, () => console.log(`App is listening on ${PORT}`));
 
