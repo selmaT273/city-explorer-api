@@ -7,8 +7,10 @@ require('dotenv').config();
 const express = require('express');
 
 // Application Setup
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 const app = express();
+
+app.use(express.static('./public'));
 
 app.get('/', (request, response) => {
   response.send('Home Page!');
