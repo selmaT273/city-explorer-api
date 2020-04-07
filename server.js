@@ -27,6 +27,17 @@ function locationHandler(request, response){
   response.send(location);
 }
 
+app.get('/weather', weatherHandler);
+
+function weatherHandler(request, response){
+  const weatherData = require('./data/darksky.json');
+  //TODO: pull lat/lon out of request.query
+  const weatherResults = [];
+  weatherData.daily.data.forEach(dailyWeather => {
+    weatherResults.push(new Weather(dailyWeather));
+  });
+  response.send(weatherResults);
+}
 
 // Make sure the server is listening for requests
 app.listen(PORT, () => console.log(`App is listening on ${PORT}`));
@@ -36,4 +47,9 @@ function Location(city, geoData) {
   this.formatted_query = geoData[0].display_name;
   this.latitude = parseFloat(geoData[0].lat);
   this.longitude = parseFloat(geoData[0].lon);
+}
+
+function Weather(weatherData) {
+  this.forecast = weatherData.summary;
+  this.time = new Date(weatherData.time * 1000);
 }
