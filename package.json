@@ -16,5 +16,10 @@
   "bugs": {
     "url": "https://github.com/selmaT273/city-explorer-api/issues"
   },
-  "homepage": "https://github.com/selmaT273/city-explorer-api#readme"
+  "homepage": "https://github.com/selmaT273/city-explorer-api#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "node": "^13.12.0"
+  }
 }
