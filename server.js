@@ -10,9 +10,9 @@ const superagent = require('superagent');
 const pg = require('pg');
 
 // DB Connection Setup
-// if (!process.env.DATABASE_URL) {
-//   throw 'Missing DATABASE_URL';
-// }
+if (!process.env.DATABASE_URL) {
+  throw 'Missing DATABASE_URL';
+}
 
 const client = new pg.Client(process.env.DATABASE_URL);
 client.on('error', err => { throw err; });
@@ -37,11 +37,6 @@ const locationCache = {
 function getLocationFromCache(city) {
   const cacheEntry = locationCache[city];
   if (cacheEntry) {
-    // Remove the cache if its older than 5 seconds
-    // if(cacheEntry.cacheTime < Date.now() - 5000) {
-    //   delete locationCache[city];
-    //   return null;
-    // }
     return cacheEntry.location;
   }
 
@@ -87,9 +82,6 @@ function locationHandler(request, response){
 app.get('/weather', weatherHandler);
 
 function weatherHandler(request, response){
-//  const weatherData = require('./data/darksky.json');
-  //TODO: pull lat/lon out of request.query
-  // const weatherResults = [];
   console.log(request.query);
   const weatherCity = request.query.search_query;
   const weatherUrl = 'https://api.weatherbit.io/v2.0/current';
@@ -97,16 +89,12 @@ function weatherHandler(request, response){
     .query({
       city: weatherCity,
       key: process.env.WEATHER_KEY,
-      // format: 'json'
     })
     .then(weatherResponse => {
       let weatherData = weatherResponse.body;
       let weatherResults = weatherData.data.map(currentWeather => {
         return new Weather(currentWeather);
       });
-      // weatherData.data.forEach(dailyWeather => {
-      //   weatherResults.push(new Weather(dailyWeather));
-      // });
       response.send(weatherResults);
     })
     .catch(err => {
