@@ -7,6 +7,15 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
+const pg = require('pg');
+
+// DB Connection Setup
+// if (!process.env.DATABASE_URL) {
+//   throw 'Missing DATABASE_URL';
+// }
+
+const client = new pg.Client(process.env.DATABASE_URL);
+client.on('error', err => { throw err; });
 
 // Application Setup
 const PORT = process.env.PORT || 3002;
@@ -106,13 +115,24 @@ function weatherHandler(request, response){
     });
 }
 
+
 // Middleware to handle not found and errors
 app.use(notFoundHandler);
 
 app.use(errorHandler);
 
 // Make sure the server is listening for requests
-app.listen(PORT, () => console.log(`App is listening on ${PORT}`));
+client.connect()
+  .then(() => {
+    console.log('PG Connected!');
+
+    app.listen(PORT, () => console.log(`App is listening on ${PORT}`));
+  })
+  .catch(err => {
+    throw `PG error!: ${err.message}`;
+  });
+
+
 
 function errorHandler(error, request, response, next){
   console.log(error);
@@ -140,3 +160,28 @@ function Weather(weatherData) {
   this.forecast = weatherData.weather.description;
   this.time = new Date (weatherData.ob_time).toDateString();
 }
+
+
+// const SQL = 'SELECT * FROM locations';
+// client.query(SQL)
+//   .then(results => {
+//     let { rowCount, rows } = results;
+
+//     if (rowCount === 0) {
+//       res.send({
+//         error: true,
+//         message: 'Read more, dummy'
+//       });
+//     } else {
+//       res.send({
+//         error: false,
+//         results: rows
+//       });
+//     }
+
+//     res.send(results.rows);
+//   })
+//   .catch(err => {
+//     console.log(err);
+//     errorHandler(err, req, res);
+//   });
