@@ -21,9 +21,27 @@ app.get('/', (request, response) => {
 
 app.get('/location', locationHandler);
 
+const locationCache = {
+  // "cedar rapids, ia": {display_name blah blah}
+};
+
+function getLocationFromCache(city) {
+  return locationCache[city];
+}
+
+function setLocationInCache(city, location) {
+  locationCache[city] = location;
+  console.log('location cache update', locationCache);
+}
+
 function locationHandler(request, response){
   // const geoData = require('./data/geo.json');
   const city = request.query.city;
+  const locationFromCache = getLocationFromCache(city);
+  if (locationFromCache) {
+    response.send(locationFromCache);
+    return;
+  }
   const url ='https://us1.locationiq.com/v1/search.php';
   superagent.get(url)
     .query({
@@ -35,6 +53,7 @@ function locationHandler(request, response){
       let geoData = locationResponse.body;
 
       const location = new Location(city, geoData);
+      setLocationInCache(city, location);
       response.send(location);
     })
     .catch(err => {
@@ -104,7 +123,7 @@ function Location(city, geoData) {
 }
 
 function Weather(weatherData) {
-  this.search_query = weatherData.city_name;
+  // this.search_query = weatherData.city_name;
   this.forecast = weatherData.weather.description;
   this.time = new Date (weatherData.ob_time).toDateString();
 }
