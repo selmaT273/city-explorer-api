@@ -48,7 +48,7 @@ app.get('/weather', weatherHandler);
 function weatherHandler(request, response){
 //  const weatherData = require('./data/darksky.json');
   //TODO: pull lat/lon out of request.query
-  const weatherResults = [];
+  // const weatherResults = [];
   console.log(request.query);
   const weatherCity = request.query.search_query;
   const weatherUrl = 'https://api.weatherbit.io/v2.0/current';
@@ -60,10 +60,12 @@ function weatherHandler(request, response){
     })
     .then(weatherResponse => {
       let weatherData = weatherResponse.body;
-
-      weatherData.data.forEach(dailyWeather => {
-        weatherResults.push(new Weather(dailyWeather));
+      let weatherResults = weatherData.data.map(currentWeather => {
+        return new Weather(currentWeather);
       });
+      // weatherData.data.forEach(dailyWeather => {
+      //   weatherResults.push(new Weather(dailyWeather));
+      // });
       response.send(weatherResults);
     })
     .catch(err => {
