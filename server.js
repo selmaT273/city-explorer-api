@@ -46,13 +46,30 @@ function locationHandler(request, response){
 app.get('/weather', weatherHandler);
 
 function weatherHandler(request, response){
-  const weatherData = require('./data/darksky.json');
+//  const weatherData = require('./data/darksky.json');
   //TODO: pull lat/lon out of request.query
   const weatherResults = [];
-  weatherData.daily.data.forEach(dailyWeather => {
-    weatherResults.push(new Weather(dailyWeather));
-  });
-  response.send(weatherResults);
+  console.log(request.query);
+  const weatherCity = request.query.search_query;
+  const weatherUrl = 'https://api.weatherbit.io/v2.0/current';
+  superagent.get(weatherUrl)
+    .query({
+      city: weatherCity,
+      key: process.env.WEATHER_KEY,
+      // format: 'json'
+    })
+    .then(weatherResponse => {
+      let weatherData = weatherResponse.body;
+
+      weatherData.data.forEach(dailyWeather => {
+        weatherResults.push(new Weather(dailyWeather));
+      });
+      response.send(weatherResults);
+    })
+    .catch(err => {
+      console.log(err);
+      errorHandler(err, request, response);
+    });
 }
 
 // Middleware to handle not found and errors
@@ -85,6 +102,7 @@ function Location(city, geoData) {
 }
 
 function Weather(weatherData) {
-  this.forecast = weatherData.summary;
-  this.time = new Date(weatherData.time * 1000);
+  this.search_query = weatherData.city_name;
+  this.forecast = weatherData.weather.description;
+  this.time = weatherData.datetime;
 }
