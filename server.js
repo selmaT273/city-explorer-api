@@ -106,5 +106,5 @@ function Location(city, geoData) {
 function Weather(weatherData) {
   this.search_query = weatherData.city_name;
   this.forecast = weatherData.weather.description;
-  this.time = weatherData.datetime;
+  this.time = new Date (weatherData.ob_time).toDateString();
 }
