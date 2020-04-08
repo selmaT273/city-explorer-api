@@ -26,11 +26,24 @@ const locationCache = {
 };
 
 function getLocationFromCache(city) {
-  return locationCache[city];
+  const cacheEntry = locationCache[city];
+  if (cacheEntry) {
+    // Remove the cache if its older than 5 seconds
+    // if(cacheEntry.cacheTime < Date.now() - 5000) {
+    //   delete locationCache[city];
+    //   return null;
+    // }
+    return cacheEntry.location;
+  }
+
+  return null;
 }
 
 function setLocationInCache(city, location) {
-  locationCache[city] = location;
+  locationCache[city] = {
+    cacheTime: new Date(),
+    location,
+  };
   console.log('location cache update', locationCache);
 }
 
