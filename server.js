@@ -39,7 +39,7 @@ function locationHandler(request, response){
     })
     .catch(err => {
       console.log(err);
-      // errorHandler(err, request, response);
+      errorHandler(err, request, response);
     });
 }
 
@@ -55,8 +55,27 @@ function weatherHandler(request, response){
   response.send(weatherResults);
 }
 
+// Middleware to handle not found and errors
+app.use(notFoundHandler);
+
+app.use(errorHandler);
+
 // Make sure the server is listening for requests
 app.listen(PORT, () => console.log(`App is listening on ${PORT}`));
+
+function errorHandler(error, request, response, next){
+  console.log(error);
+  response.status(500).json({
+    error: true,
+    message: error.message,
+  });
+}
+
+function notFoundHandler(request, response) {
+  response.status(404).json({
+    notFound: true,
+  });
+}
 
 function Location(city, geoData) {
   this.search_query = city;
