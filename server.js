@@ -31,9 +31,6 @@ app.get('/', (request, response) => {
 
 app.get('/location', locationHandler);
 
-const locationCache = {
-  // "cedar rapids, ia": {display_name blah blah}
-};
 
 function getLocationFromCache(city) {
   const SQL = 'SELECT * FROM locations WHERE search_query = $1;';
@@ -55,20 +52,27 @@ function getLocationFromCache(city) {
 }
 
 function setLocationInCache(city, location) {
-  locationCache[city] = {
-    cacheTime: new Date(),
-    location,
-  };
+  let setSQL = `INSERT INTO locations (search_query, formatted_query, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING *;`;
+  let values = [location.search_query, location.formatted_query, location.latitude, location.longitude];
+  return client.query(setSQL, values)
+    .then(results => {
+      console.log(results)
+      return results;
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
   // console.log('location cache update', locationCache);
-}
+
 
 async function locationHandler(request, response){
   // const geoData = require('./data/geo.json');
   const city = request.query.city;
   const locationFromCache = await getLocationFromCache(city);
-  console.log(locationFromCache);
+  // console.log(locationFromCache);
   if (locationFromCache.rowCount) {
-    response.send(locationFromCache);
+    response.send(locationFromCache.rows[0]);
     return;
   }
   const url ='https://us1.locationiq.com/v1/search.php';
@@ -80,7 +84,7 @@ async function locationHandler(request, response){
     })
     .then(locationResponse => {
       let geoData = locationResponse.body;
-
+      
       const location = new Location(city, geoData);
       setLocationInCache(city, location);
       response.send(location);
