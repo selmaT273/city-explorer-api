@@ -17,6 +17,7 @@ if (!process.env.DATABASE_URL) {
 const client = new pg.Client(process.env.DATABASE_URL);
 client.on('error', err => { throw err; });
 
+
 // Application Setup
 const PORT = process.env.PORT || 3002;
 const app = express();
@@ -35,12 +36,22 @@ const locationCache = {
 };
 
 function getLocationFromCache(city) {
-  const cacheEntry = locationCache[city];
-  if (cacheEntry) {
-    return cacheEntry.location;
-  }
+  const SQL = 'SELECT * FROM locations WHERE search_query = $1;';
+  let values = [city];
+  return client.query(SQL, values)
+    .then(results => {
+      return results;
+    })
+    .catch(err => {
+      console.log(err);
+    });
 
-  return null;
+  // const cacheEntry = locationCache[city];
+  // if (cacheEntry) {
+  //   return cacheEntry.location;
+  // }
+
+  // return null;
 }
 
 function setLocationInCache(city, location) {
@@ -48,14 +59,15 @@ function setLocationInCache(city, location) {
     cacheTime: new Date(),
     location,
   };
-  console.log('location cache update', locationCache);
+  // console.log('location cache update', locationCache);
 }
 
-function locationHandler(request, response){
+async function locationHandler(request, response){
   // const geoData = require('./data/geo.json');
   const city = request.query.city;
-  const locationFromCache = getLocationFromCache(city);
-  if (locationFromCache) {
+  const locationFromCache = await getLocationFromCache(city);
+  console.log(locationFromCache);
+  if (locationFromCache.rowCount) {
     response.send(locationFromCache);
     return;
   }
@@ -192,26 +204,3 @@ function Trails(trailsData) {
 
 
 
-// const SQL = 'SELECT * FROM locations';
-// client.query(SQL)
-//   .then(results => {
-//     let { rowCount, rows } = results;
-
-//     if (rowCount === 0) {
-//       res.send({
-//         error: true,
-//         message: 'Read more, dummy'
-//       });
-//     } else {
-//       res.send({
-//         error: false,
-//         results: rows
-//       });
-//     }
-
-//     res.send(results.rows);
-//   })
-//   .catch(err => {
-//     console.log(err);
-//     errorHandler(err, req, res);
-//   });
