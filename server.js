@@ -84,7 +84,7 @@ app.get('/weather', weatherHandler);
 function weatherHandler(request, response){
   console.log(request.query);
   const weatherCity = request.query.search_query;
-  const weatherUrl = 'https://api.weatherbit.io/v2.0/current';
+  const weatherUrl = 'https://api.weatherbit.io/v2.0/forecast/daily';
   superagent.get(weatherUrl)
     .query({
       city: weatherCity,
@@ -101,6 +101,33 @@ function weatherHandler(request, response){
       console.log(err);
       errorHandler(err, request, response);
     });
+}
+
+app.get('/trails', trailsHandler);
+
+function trailsHandler(request, response){
+  console.log(request.query);
+  const lat = request.query.latitude;
+  const lon = request.query.longitude;
+  const trailsUrl = 'https://www.hikingproject.com/data/get-trails';
+  superagent.get(trailsUrl)
+    .query({
+      key: process.env.TRAILS_KEY,
+      lat: lat,
+      lon: lon,
+    })
+    .then(trailsResponse => {
+      let trailsData = trailsResponse.body;
+      let trailsResults = trailsData.trails.map(currentTrails => {
+        return new Trails(currentTrails);
+      });
+      response.send(trailsResults);
+    })
+    .catch(err => {
+      console.log(err);
+      errorHandler(err, request, response);
+    });
+
 }
 
 
@@ -146,8 +173,23 @@ function Location(city, geoData) {
 function Weather(weatherData) {
   // this.search_query = weatherData.city_name;
   this.forecast = weatherData.weather.description;
-  this.time = new Date (weatherData.ob_time).toDateString();
+  this.time = new Date (weatherData.valid_date).toDateString();
 }
+
+function Trails(trailsData) {
+  this.name = trailsData.name;
+  this.location = trailsData.location;
+  this.length = trailsData.length;
+  this.stars = trailsData.stars;
+  this.star_votes = trailsData.starVotes;
+  this.summary = trailsData.summary;
+  this.trail_url = trailsData.url;
+  this.conditions = trailsData.conditionDetails;
+  this.condition_date = new Date (trailsData.conditionDate).toDateString();
+}
+
+
+
 
 
 // const SQL = 'SELECT * FROM locations';
