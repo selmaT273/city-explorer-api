@@ -40,8 +40,8 @@ app.get('/weather', weatherHandler);
 const trailsHandler = require('./modules/trails');
 app.get('/trails', trailsHandler);
 
-// const yelpHandler = require('./modules/yelp');
-// app.get('/yelp', yelpHandler);
+const yelpHandler = require('./modules/yelp');
+app.get('/yelp', yelpHandler);
 
 
 // Middleware to handle not found and errors
