@@ -7,17 +7,6 @@ dotenv.config();
 // Application Dependencies
 const express = require('express');
 const cors = require('cors');
-// const superagent = require('superagent');
-// const pg = require('pg');
-
-// DB Connection Setup
-// if (!process.env.DATABASE_URL) {
-//   throw 'Missing DATABASE_URL';
-// }
-
-// const client = new pg.Client(process.env.DATABASE_URL);
-// client.on('error', err => { throw err; });
-
 
 // Application Setup
 const PORT = process.env.PORT || 3002;
@@ -36,13 +25,14 @@ app.get('/location', locationHandler);
 const weatherHandler = require('./modules/weather');
 app.get('/weather', weatherHandler);
 
-
 const trailsHandler = require('./modules/trails');
 app.get('/trails', trailsHandler);
 
 const yelpHandler = require('./modules/yelp');
 app.get('/yelp', yelpHandler);
 
+const moviesHandler = require('./modules/movies');
+app.get('/movies', moviesHandler);
 
 // Middleware to handle not found and errors
 app.use(notFoundHandler);
