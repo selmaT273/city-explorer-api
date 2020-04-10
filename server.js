@@ -42,13 +42,6 @@ function getLocationFromCache(city) {
     .catch(err => {
       console.log(err);
     });
-
-  // const cacheEntry = locationCache[city];
-  // if (cacheEntry) {
-  //   return cacheEntry.location;
-  // }
-
-  // return null;
 }
 
 function setLocationInCache(city, location) {
@@ -63,14 +56,10 @@ function setLocationInCache(city, location) {
       console.log(err);
     });
 };
-  // console.log('location cache update', locationCache);
-
 
 async function locationHandler(request, response){
-  // const geoData = require('./data/geo.json');
   const city = request.query.city;
   const locationFromCache = await getLocationFromCache(city);
-  // console.log(locationFromCache);
   if (locationFromCache.rowCount) {
     response.send(locationFromCache.rows[0]);
     return;
@@ -95,29 +84,9 @@ async function locationHandler(request, response){
     });
 }
 
+const weatherHandler = require('./modules/weather');
 app.get('/weather', weatherHandler);
 
-function weatherHandler(request, response){
-  console.log(request.query);
-  const weatherCity = request.query.search_query;
-  const weatherUrl = 'https://api.weatherbit.io/v2.0/forecast/daily';
-  superagent.get(weatherUrl)
-    .query({
-      city: weatherCity,
-      key: process.env.WEATHER_KEY,
-    })
-    .then(weatherResponse => {
-      let weatherData = weatherResponse.body;
-      let weatherResults = weatherData.data.map(currentWeather => {
-        return new Weather(currentWeather);
-      });
-      response.send(weatherResults);
-    })
-    .catch(err => {
-      console.log(err);
-      errorHandler(err, request, response);
-    });
-}
 
 app.get('/trails', trailsHandler);
 
@@ -146,10 +115,8 @@ function trailsHandler(request, response){
 
 }
 
-
 // Middleware to handle not found and errors
 app.use(notFoundHandler);
-
 app.use(errorHandler);
 
 // Make sure the server is listening for requests
@@ -186,11 +153,7 @@ function Location(city, geoData) {
   this.longitude = parseFloat(geoData[0].lon);
 }
 
-function Weather(weatherData) {
-  // this.search_query = weatherData.city_name;
-  this.forecast = weatherData.weather.description;
-  this.time = new Date (weatherData.valid_date).toDateString();
-}
+
 
 function Trails(trailsData) {
   this.name = trailsData.name;
